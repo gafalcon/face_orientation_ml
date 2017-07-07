@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Spyder Editor
 
-This is a temporary script file.
 """
 
 import pandas
@@ -28,7 +26,7 @@ def clean_data(filename):
     res["orientation"] = filename
 
     res.to_csv(filename+"_res.csv")
-    
+
 clean_data("up")
 clean_data("down")
 clean_data("left")
