@@ -33,3 +33,6 @@ clean_data("down4", "down")
 clean_data("left4", "left")
 clean_data("right4", "right")
 clean_data("center4", "center")
+
+clean_data("tv_left", "tv")
+clean_data("tv_right", "tv")

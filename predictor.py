@@ -30,11 +30,11 @@ def predict(*features):
     pred = classifier.predict(scaled_features.reshape(1,-1))
     return class_names[pred[0]]
 
-while True:
-    features = [float(feature) for feature in input().split(" ")]
-    print(predict(*features))
-    # features_to_scale = np.array(features[:-2], dtype=np.float64)
-    # scaled = scaler.transform(features_to_scale.reshape(1,-1))
-    # scaled_features = np.insert(scaled,6,features[-2:])
-    # pred = classifier.predict(scaled_features.reshape(1,-1))
-    # print(class_names[pred[0]])
+# while True:
+#     features = [float(feature) for feature in input().split(" ")]
+#     print(predict(*features))
+#     # features_to_scale = np.array(features[:-2], dtype=np.float64)
+#     # scaled = scaler.transform(features_to_scale.reshape(1,-1))
+#     # scaled_features = np.insert(scaled,6,features[-2:])
+#     # pred = classifier.predict(scaled_features.reshape(1,-1))
+#     # print(class_names[pred[0]])

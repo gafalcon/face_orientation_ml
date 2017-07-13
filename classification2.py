@@ -53,9 +53,9 @@ dot_data = export_graphviz(model, out_file=None,
                            class_names=classes,
                            filled=True)
 graph = pydotplus.graph_from_dot_data(dot_data)
-graph.write_pdf("tree_model_full_depth10.pdf")
+graph.write_pdf("tree_model_full.pdf")
 
 #Saving the model to use later
 from sklearn.externals import joblib
-joblib.dump(model, "tree_model_full_depth10.pkl")
-joblib.dump(sc_X, "tree_scaler_full_depth10.pkl")
+joblib.dump(model, "tree_model_full.pkl")
+joblib.dump(sc_X, "tree_scaler_full.pkl")
