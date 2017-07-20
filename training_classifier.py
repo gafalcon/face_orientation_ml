@@ -1,11 +1,28 @@
 import pandas as pd
 import numpy as np
+from datetime import datetime
 
-df = pd.read_csv("./datasets/gabo/training_dataset_full.csv")
+from os import listdir, mkdir
+from os.path import isfile, join
+import sys
 
-X = df.iloc[:,2:-2]
+if len(sys.argv) < 2:
+    print "Ingrese ubicacion de archivos csv"
+    sys.exit(-1)
+
+filepath = sys.argv[1]
+
+print "Looking for csv files in ", filepath
+csvfiles = [join(filepath,f) for f in listdir(filepath) if f.endswith(".csv")]
+print "files found", csvfiles
+
+df = pd.concat([pd.read_csv(csvfile) for csvfile in csvfiles])
+
+print "Features", df.columns
+print "Num of training rows", len(df)
+
+X = df.iloc[:,:-1]
 y = df.iloc[:,-1]
-
 
 #One hot enconding categorical features
 X['lear'] = X['lear'].astype('category')
@@ -16,7 +33,6 @@ X['rear'] = pd.get_dummies(X["rear"], drop_first=True)
 y = y.astype("category")
 classes = list(y.cat.categories)
 y = y.cat.codes
-
 
 #Scaling numerical values
 from sklearn.preprocessing import StandardScaler
@@ -47,15 +63,16 @@ print(classification_report(y_test, y_predicted,target_names=classes))
 #     print ( "Score for class", class_name, ":",  model.score(features_from_ith_class, np.ones((len(features_from_ith_class),), dtype=np.int8)*i))
 
 #Saving tree image
+timestamp = datetime.now().strftime("%d.%m_%H.%M.%S")
 import pydotplus
 dot_data = export_graphviz(model, out_file=None,
                            feature_names=list(X),
                            class_names=classes,
                            filled=True)
 graph = pydotplus.graph_from_dot_data(dot_data)
-graph.write_pdf("tree_model_full.pdf")
+graph.write_pdf(join("results","tree_model_full_"+timestamp+".pdf"))
 
 #Saving the model to use later
 from sklearn.externals import joblib
-joblib.dump(model, "tree_model_full.pkl")
-joblib.dump(sc_X, "tree_scaler_full.pkl")
+joblib.dump(model, join("results","tree_model_"+timestamp+".pkl"))
+joblib.dump(sc_X, join("results","tree_scaler_"+timestamp+".pkl"))

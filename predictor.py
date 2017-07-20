@@ -15,6 +15,8 @@ Arg_order:
 9. d_leye_nose
 10. d_reye_rear
 11. d_reye_nose
+12. d_nose_neck
+13. neck_x
 12. lear: 1 if present 0 otherwise
 13. rear: 1 if present 0 otherwise
 
@@ -26,15 +28,7 @@ class_names = ['center', 'down', 'left', 'right', 'tv', 'up']
 def predict(*features):
     features_to_scale = np.array(features[:-2], dtype=np.float64)
     scaled = scaler.transform(features_to_scale.reshape(1,-1))
-    scaled_features = np.insert(scaled,6,features[-2:])
+    scaled_features = np.append(scaled,features[-2:])
     pred = classifier.predict(scaled_features.reshape(1,-1))
     return class_names[pred[0]]
 
-# while True:
-#     features = [float(feature) for feature in input().split(" ")]
-#     print(predict(*features))
-#     # features_to_scale = np.array(features[:-2], dtype=np.float64)
-#     # scaled = scaler.transform(features_to_scale.reshape(1,-1))
-#     # scaled_features = np.insert(scaled,6,features[-2:])
-#     # pred = classifier.predict(scaled_features.reshape(1,-1))
-#     # print(class_names[pred[0]])
