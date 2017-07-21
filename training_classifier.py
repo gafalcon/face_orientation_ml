@@ -6,9 +6,13 @@ from os import listdir, mkdir
 from os.path import isfile, join
 import sys
 
+save_models = True
+
 if len(sys.argv) < 2:
     print "Ingrese ubicacion de archivos csv"
     sys.exit(-1)
+if len(sys.argv) == 3 and sys.argv[2]:
+    save_models = False
 
 filepath = sys.argv[1]
 
@@ -52,27 +56,48 @@ from sklearn.tree import DecisionTreeClassifier, export_graphviz
 classifier = DecisionTreeClassifier(presort=True)#, max_depth=10)
 model = classifier.fit(X_train,y_train)
 
+from sklearn.svm import SVC
+svm_classifier = SVC()
+svm_model = svm_classifier.fit(X_train,y_train)
+
+from sklearn.ensemble import RandomForestClassifier
+forest_classifier = RandomForestClassifier()
+forest_model = forest_classifier.fit(X_train, y_train)
+
 #Evaluating the model
 from sklearn.metrics import classification_report
-print ("Model score: ", model.score(X_test, y_test))
-
+print ("Report for tree classifier")
+print ("Tree Model score: ", model.score(X_test, y_test))
 y_predicted = model.predict(X_test)
+print(classification_report(y_test, y_predicted,target_names=classes))
+
+print ("Report for svm classifier")
+print ("svm Model score: ", svm_model.score(X_test, y_test))
+y_predicted = svm_model.predict(X_test)
 print(classification_report(y_test, y_predicted,target_names=classes))
 # for i, class_name in enumerate(classes):
 #     features_from_ith_class = X_test[y_test == i]
 #     print ( "Score for class", class_name, ":",  model.score(features_from_ith_class, np.ones((len(features_from_ith_class),), dtype=np.int8)*i))
 
-#Saving tree image
-timestamp = datetime.now().strftime("%d.%m_%H.%M.%S")
-import pydotplus
-dot_data = export_graphviz(model, out_file=None,
-                           feature_names=list(X),
-                           class_names=classes,
-                           filled=True)
-graph = pydotplus.graph_from_dot_data(dot_data)
-graph.write_pdf(join("results","tree_model_full_"+timestamp+".pdf"))
 
-#Saving the model to use later
-from sklearn.externals import joblib
-joblib.dump(model, join("results","tree_model_"+timestamp+".pkl"))
-joblib.dump(sc_X, join("results","tree_scaler_"+timestamp+".pkl"))
+print ("Report for Random Forest classifier")
+print ("Random Forest Model score: ", forest_model.score(X_test, y_test))
+y_predicted = forest_model.predict(X_test)
+print(classification_report(y_test, y_predicted,target_names=classes))
+
+#Saving tree image
+if save_models:
+    timestamp = datetime.now().strftime("%d.%m_%H.%M.%S")
+    import pydotplus
+    dot_data = export_graphviz(model, out_file=None,
+                               feature_names=list(X),
+                               class_names=classes,
+                               filled=True)
+    graph = pydotplus.graph_from_dot_data(dot_data)
+    graph.write_pdf(join("results","tree_model_full_"+timestamp+".pdf"))
+
+    #Saving the model to use later
+    from sklearn.externals import joblib
+    joblib.dump(model, join("results","tree_model_"+timestamp+".pkl"))
+    joblib.dump(sc_X, join("results","tree_scaler_"+timestamp+".pkl"))
+    joblib.dump(forest_model, join("results", "random_forest_model_"+timestamp+".pkl"))
