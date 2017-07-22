@@ -101,3 +101,4 @@ if save_models:
     joblib.dump(model, join("results","tree_model_"+timestamp+".pkl"))
     joblib.dump(sc_X, join("results","tree_scaler_"+timestamp+".pkl"))
     joblib.dump(forest_model, join("results", "random_forest_model_"+timestamp+".pkl"))
+    joblib.dump(svm_model, join("results", "svm_model_"+timestamp+".pkl"))
