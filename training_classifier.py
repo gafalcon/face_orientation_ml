@@ -6,6 +6,11 @@ from os import listdir, mkdir
 from os.path import isfile, join
 import sys
 
+#importing classifiers
+from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.tree import DecisionTreeClassifier, export_graphviz
+
 save_models = True
 
 if len(sys.argv) < 2:
@@ -46,22 +51,52 @@ X[X.columns.drop(['lear', 'rear'])] = sc_X.fit_transform(X[X.columns.drop(['lear
 # X_train = sc_X.fit_transform(X_train)
 # X_test = sc_X.transform(X_test)
 
+#Cross validation
+from sklearn.model_selection import cross_val_score, ShuffleSplit
+
+for C in [60., 70., 75., 90.]:
+    svm_classifier = SVC(C=C, kernel='rbf')
+    cv = ShuffleSplit(n_splits=5, test_size=0.3, random_state=0)
+    scores = cross_val_score(svm_classifier, X, y, cv=cv)
+    print "Scores with C=",C, scores
+    print("Accuracy: %0.5f (+/- %0.5f)" % (scores.mean(), scores.std() * 2))
+
+#Best C according to cross-validati0n
+C = 70.
+
+for max_depth in [None, 10, 20, 15]:
+    tree_classifier = DecisionTreeClassifier(max_depth=max_depth)
+    cv = ShuffleSplit(n_splits=5, test_size=0.3)
+    scores = cross_val_score(tree_classifier, X, y, cv=cv)
+    print "Scores with max_depth=",max_depth, scores
+    print("Accuracy: %0.5f (+/- %0.5f)" % (scores.mean(), scores.std() * 2))
+
+#Best max_depth
+max_depth = 15
+
+for n_estimators in [10, 15, 20]:
+    rf_classifier = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth)
+    cv = ShuffleSplit(n_splits=5, test_size=0.3)
+    scores = cross_val_score(rf_classifier, X, y, cv=cv)
+    print "Scores with n_estimators=",n_estimators, scores
+    print("Accuracy: %0.5f (+/- %0.5f)" % (scores.mean(), scores.std() * 2))
+
+#Best n_estimators
+n_estimators = 20
+
 #Split into train,test
 from sklearn.model_selection import train_test_split
 X_train,X_test,y_train,y_test = train_test_split(X,y,test_size=0.25)
 
 
 #Fitting the model
-from sklearn.tree import DecisionTreeClassifier, export_graphviz
-classifier = DecisionTreeClassifier(presort=True)#, max_depth=10)
+classifier = DecisionTreeClassifier(presort=True, max_depth=max_depth)
 model = classifier.fit(X_train,y_train)
 
-from sklearn.svm import SVC
-svm_classifier = SVC()
+svm_classifier = SVC(C=C, kernel='rbf', probability=True)
 svm_model = svm_classifier.fit(X_train,y_train)
 
-from sklearn.ensemble import RandomForestClassifier
-forest_classifier = RandomForestClassifier()
+forest_classifier = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth)
 forest_model = forest_classifier.fit(X_train, y_train)
 
 #Evaluating the model
@@ -102,3 +137,12 @@ if save_models:
     joblib.dump(sc_X, join("results","tree_scaler_"+timestamp+".pkl"))
     joblib.dump(forest_model, join("results", "random_forest_model_"+timestamp+".pkl"))
     joblib.dump(svm_model, join("results", "svm_model_"+timestamp+".pkl"))
+
+
+#Precision-Recall curves
+# from sklearn.metrics import precision_recall_curve
+# y_score = svm_model.decision_function(X_test)
+# precision, recall, thresholds = precision_recall_curve(y_test, y_score)
+# from matplotlib import pyplot as plt
+# plt.plot(recall, precision)
+# plt.show()
